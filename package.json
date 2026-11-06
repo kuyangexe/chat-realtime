@@ -1,0 +1,22 @@
+{
+  "name": "whatsapp-realtime-chat",
+  "version": "1.0.0",
+  "description": "WhatsApp-like Realtime Chat Web Application",
+  "scripts": {
+    "install:all": "npm --prefix server install && npm --prefix client install",
+    "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
+    "start": "node server/src/server.js",
+    "server": "node server/src/server.js",
+    "client": "npm --prefix client run dev"
+  },
+  "keywords": [
+    "whatsapp",
+    "chat",
+    "realtime",
+    "socket.io",
+    "react",
+    "tailwind"
+  ],
+  "author": "",
+  "license": "ISC"
+}

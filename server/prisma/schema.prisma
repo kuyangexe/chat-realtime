@@ -1,0 +1,78 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String               @id @default(uuid())
+  username     String               @unique
+  password     String
+  displayName  String
+  avatarUrl    String?
+  about        String               @default("Ada di WhatsApp")
+  isOnline     Boolean              @default(false)
+  lastSeen     DateTime             @default(now())
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  memberships  ConversationMember[]
+  sentMessages Message[]            @relation("SentMessages")
+  receipts     MessageReceipt[]
+}
+
+model Conversation {
+  id          String               @id @default(uuid())
+  isGroup     Boolean              @default(false)
+  name        String?
+  groupAvatar String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  members     ConversationMember[]
+  messages    Message[]
+}
+
+model ConversationMember {
+  id             String       @id @default(uuid())
+  conversationId String
+  userId         String
+  role           String       @default("member") // "admin" | "member"
+  joinedAt       DateTime     @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String           @id @default(uuid())
+  conversationId String
+  senderId       String
+  content        String
+  type           String           @default("text") // "text" | "image" | "file"
+  mediaUrl       String?
+  fileName       String?
+  createdAt      DateTime         @default(now())
+
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User             @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receipts       MessageReceipt[]
+}
+
+model MessageReceipt {
+  id        String   @id @default(uuid())
+  messageId String
+  userId    String
+  status    String   @default("delivered") // "delivered" | "read"
+  updatedAt DateTime @updatedAt
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+}
